@@ -1,0 +1,178 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>Simple</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+application.conf
+
+    注释掉所有数据库连接配置
+        # db.url=jdbc:mysql://localhost:3306/mtjh?characterEncoding=utf8
+        # db.driver=com.mysql.jdbc.Driver
+        # db.user=root
+        # db.pass=root
+
+    将如下代码解开并修改
+        db=java:/comp/env/jdbc/mtjh
+        db.destroyMethod=close
+        jpa.dialect=org.hibernate.dialect.MySQL5Dialect
+
+tomcat/conf/context.xml
+
+    增加如下代码
+        <Resource name="jdbc/mtjh" 
+        auth="Container" type="javax.sql.DataSource" maxActive="100" 
+        maxIdle="30" maxWait="10000" username="root" password="root" 
+        driverClassName="com.mysql.jdbc.Driver" 
+        removeAbandoned="true"  
+        removeAbandonedTimeout="180"  
+        url="jdbc:mysql://localhost:3306/mtjh?characterEncoding=utf8" />
+
+程序文件打包后的ROOT/WEB-INF/web.xml
+
+    增加如下代码
+        <resource-ref>
+            <res-ref-name>jdbc/mtjh</res-ref-name>
+            <res-type>javax.sql.DataSource</res-type>
+            <res-auth>Container</res-auth>
+        </resource-ref>
+  
+可修改play1.X.X/resources/war/web.xml增加上面的代码，这样就不用每次打包后都修改web.xml了
+
+修改完上述配置后重启tomcat即可
+
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<p>application.conf</p>
+
+<pre><code>注释掉所有数据库连接配置
+    # db.url=jdbc:mysql://localhost:3306/mtjh?characterEncoding=utf8
+    # db.driver=com.mysql.jdbc.Driver
+    # db.user=root
+    # db.pass=root
+
+将如下代码解开并修改
+    db=java:/comp/env/jdbc/mtjh
+    db.destroyMethod=close
+    jpa.dialect=org.hibernate.dialect.MySQL5Dialect
+</code></pre>
+
+<p>tomcat/conf/context.xml</p>
+
+<pre><code>增加如下代码
+    &lt;Resource name="jdbc/mtjh" 
+    auth="Container" type="javax.sql.DataSource" maxActive="100" 
+    maxIdle="30" maxWait="10000" username="root" password="root" 
+    driverClassName="com.mysql.jdbc.Driver" 
+    removeAbandoned="true"  
+    removeAbandonedTimeout="180"  
+    url="jdbc:mysql://localhost:3306/mtjh?characterEncoding=utf8" /&gt;
+</code></pre>
+
+<p>程序文件打包后的ROOT/WEB-INF/web.xml</p>
+
+<pre><code>增加如下代码
+    &lt;resource-ref&gt;
+        &lt;res-ref-name&gt;jdbc/mtjh&lt;/res-ref-name&gt;
+        &lt;res-type&gt;javax.sql.DataSource&lt;/res-type&gt;
+        &lt;res-auth&gt;Container&lt;/res-auth&gt;
+    &lt;/resource-ref&gt;
+</code></pre>
+
+<p>可修改play1.X.X/resources/war/web.xml增加上面的代码，这样就不用每次打包后都修改web.xml了</p>
+
+<p>修改完上述配置后重启tomcat即可</p>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2014 by isnowfy, Designed by isnowfy</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "playFramework Config Tomcat Pool";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+</body>
+</html>
