@@ -25,12 +25,86 @@
 	</div>
 <div id="md" style="display: none;">
 <!-- markdown -->
+application.conf
+
+    注释掉所有数据库连接配置
+        # db.url=jdbc:mysql://localhost:3306/dataBaseName?characterEncoding=utf8
+        # db.driver=com.mysql.jdbc.Driver
+        # db.user=root
+        # db.pass=root
+
+    将如下代码解开并修改
+        db=java:/comp/env/jdbc/dataBaseName
+        db.destroyMethod=close
+        jpa.dialect=org.hibernate.dialect.MySQL5Dialect
+
+tomcat/conf/context.xml
+
+    增加如下代码
+        <Resource name="jdbc/dataBaseName" 
+        auth="Container" type="javax.sql.DataSource" maxActive="100" 
+        maxIdle="30" maxWait="10000" username="root" password="root" 
+        driverClassName="com.mysql.jdbc.Driver" 
+        removeAbandoned="true"  
+        removeAbandonedTimeout="180"  
+        url="jdbc:mysql://localhost:3306/dataBaseName?characterEncoding=utf8" />
+
+程序文件打包后的ROOT/WEB-INF/web.xml
+
+    增加如下代码
+        <resource-ref>
+            <res-ref-name>jdbc/dataBaseName</res-ref-name>
+            <res-type>javax.sql.DataSource</res-type>
+            <res-auth>Container</res-auth>
+        </resource-ref>
+  
+可修改play1.X.X/resources/war/web.xml增加上面的代码，这样就不用每次打包后都修改web.xml了
+
+修改完上述配置后重启tomcat即可
 
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
 <!-- content -->
+<p>application.conf</p>
 
+<pre><code>注释掉所有数据库连接配置
+    # db.url=jdbc:mysql://localhost:3306/dataBaseName?characterEncoding=utf8
+    # db.driver=com.mysql.jdbc.Driver
+    # db.user=root
+    # db.pass=root
+
+将如下代码解开并修改
+    db=java:/comp/env/jdbc/dataBaseName
+    db.destroyMethod=close
+    jpa.dialect=org.hibernate.dialect.MySQL5Dialect
+</code></pre>
+
+<p>tomcat/conf/context.xml</p>
+
+<pre><code>增加如下代码
+    &lt;Resource name="jdbc/dataBaseName" 
+    auth="Container" type="javax.sql.DataSource" maxActive="100" 
+    maxIdle="30" maxWait="10000" username="root" password="root" 
+    driverClassName="com.mysql.jdbc.Driver" 
+    removeAbandoned="true"  
+    removeAbandonedTimeout="180"  
+    url="jdbc:mysql://localhost:3306/dataBaseName?characterEncoding=utf8" /&gt;
+</code></pre>
+
+<p>程序文件打包后的ROOT/WEB-INF/web.xml</p>
+
+<pre><code>增加如下代码
+    &lt;resource-ref&gt;
+        &lt;res-ref-name&gt;jdbc/dataBaseName&lt;/res-ref-name&gt;
+        &lt;res-type&gt;javax.sql.DataSource&lt;/res-type&gt;
+        &lt;res-auth&gt;Container&lt;/res-auth&gt;
+    &lt;/resource-ref&gt;
+</code></pre>
+
+<p>可修改play1.X.X/resources/war/web.xml增加上面的代码，这样就不用每次打包后都修改web.xml了</p>
+
+<p>修改完上述配置后重启tomcat即可</p>
 <!-- content end -->
 </div>
 <br>
